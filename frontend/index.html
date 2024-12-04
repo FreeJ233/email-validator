@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>邮箱验证</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>邮箱有效性验证</h1>
+
+    <h3>单独验证邮箱</h3>
+    <input type="email" id="singleEmail" placeholder="输入邮箱地址" required>
+    <button onclick="verifyEmail()">验证邮箱</button>
+    <div id="singleResult"></div>
+
+    <h3>批量验证邮箱</h3>
+    <textarea id="batchEmails" placeholder="每行一个邮箱地址" rows="10" cols="30"></textarea>
+    <button onclick="verifyEmails()">批量验证</button>
+    <div id="batchResult"></div>
+
+    <h3>上传邮箱列表文件</h3>
+    <input type="file" id="emailFile" accept=".txt" required>
+    <button onclick="uploadFile()">上传并验证</button>
+    <div id="fileResult"></div>
+  </div>
+
+  <script>
+    // 单独验证邮箱
+    function verifyEmail() {
+      const email = document.getElementById('singleEmail').value;
+      fetch('http://localhost:3000/verify-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('singleResult').innerHTML = `邮箱：${data.email}，状态：${data.status}`;
+      })
+      .catch(error => console.error('验证失败：', error));
+    }
+
+    // 批量验证邮箱
+    function verifyEmails() {
+      const emails = document.getElementById('batchEmails').value.split('\n').map(email => email.trim()).filter(email => email.length > 0);
+      fetch('http://localhost:3000/verify-emails', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emails }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        let result = '';
+        data.results.forEach(resultItem => {
+          result += `邮箱：${resultItem.email}，状态：${resultItem.status}<br>`;
+        });
+        document.getElementById('batchResult').innerHTML = result;
+      })
+      .catch(error => console.error('批量验证失败：', error));
+    }
+
+    // 上传文件并验证
+    function uploadFile() {
+      const fileInput = document.getElementById('emailFile');
+      const formData = new FormData();
+      formData.append('emailFile', fileInput.files[0]);
+
+      fetch('http://localhost:3000/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      .then(response => response.json())
+      .then(data => {
+        let result = '';
+        data.results.forEach(resultItem => {
+          result += `邮箱：${resultItem.email}，状态：${resultItem.status}<br>`;
+        });
+        document.getElementById('fileResult').innerHTML = result;
+      })
+      .catch(error => console.error('上传失败：', error));
+    }
+  </script>
+</body>
+</html>
