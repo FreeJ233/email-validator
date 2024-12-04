@@ -36,7 +36,4 @@ button:hover {
 
 #singleResult, #batchResult, #fileResult {
   margin-top: 20px;
-  padding: 10px;
-  background-color: #e1f7d5;
-  border: 1px solid #4CAF50;
 }
